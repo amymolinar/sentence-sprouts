@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sentence Sprouts — Nouns, Verbs & Adjectives</title>
+<style>
+:root{
+  --ink:#1e3557;
+  --muted:#d8e6ff;
+  --bg:#dcecff;
+  --panel1:#8fbaeF;
+  --panel2:#7fafe6;
+  --panel3:#22579f;
+  --panel4:#386fb8;
+  --white:#ffffff;
+  --red:#df4141;
+  --redbg:#ffdcdc;
+  --green:#1f9d61;
+  --greenbg:#dbf6e8;
+  --yellow:#f1c232;
+  --yellowbg:#fff4c9;
+  --shadow:0 12px 26px rgba(23,53,97,.18)
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#d6e8ff,#cfe4ff);color:var(--ink);font-family:ui-rounded,"Trebuchet MS",Arial,sans-serif;min-height:100vh}
+.app{max-width:1100px;margin:0 auto;padding:25px 24px 46px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:23px}
+.logo{display:flex;align-items:center;gap:15px}
+.mascot{width:76px;height:76px;display:grid;place-items:center;font-size:44px;background:#b9dcff;border:4px solid #fff;border-radius:24px;transform:rotate(-5deg);box-shadow:0 9px 20px rgba(35,83,149,.16)}
+h1{margin:0;font-size:clamp(30px,4.2vw,46px);letter-spacing:-1.5px;line-height:1.06;color:#18385f}h1 span{color:#fff}.subtitle{margin:7px 0 0;color:#f3f8ff;font-size:16px;font-weight:bold}
+.topstar{font-size:35px;opacity:.95;white-space:nowrap}
+.panel{border:3px solid rgba(255,255,255,.68);box-shadow:var(--shadow);border-radius:29px}
+.options{background:var(--panel1);padding:19px 23px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:20px;justify-content:space-between}
+.option-caption{font-size:14px;color:#eef6ff;font-weight:900;margin:0 0 8px;text-transform:uppercase;letter-spacing:.7px}
+.segment{display:inline-flex;background:#9ec2ef;padding:5px;gap:5px;border-radius:17px;flex-wrap:wrap}
+.segment button{font:inherit;border:0;border-radius:12px;background:transparent;color:#204670;padding:10px 15px;font-size:15px;font-weight:900;cursor:pointer;transition:.2s}
+.segment button.active{background:#fff;color:#19406a;box-shadow:0 4px 11px rgba(122,151,196,.4)}
+.stats{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.stat{background:#8eb8ee;padding:11px 15px;border-radius:14px;min-width:100px;text-align:center;font-size:14px;color:#eff7ff;font-weight:bold;border:2px solid rgba(255,255,255,.35)}
+.stat b{display:block;font-size:25px;line-height:1;color:#fff;margin-bottom:5px}
+.main-panel{background:var(--panel2);padding:23px 26px 24px;position:relative;overflow:hidden}
+.main-panel:before{content:"";position:absolute;right:-65px;top:-83px;width:170px;height:170px;background:rgba(255,255,255,.15);border-radius:100%;pointer-events:none}
+.section-label{margin:0 0 6px;color:#ecf5ff;font-weight:900;letter-spacing:.4px;font-size:15px}
+.directions{font-size:18px;margin:0;color:#fff;font-weight:700;line-height:1.4}
+.tools{margin:18px 0 8px;display:flex;gap:10px;flex-wrap:wrap}
+.tool{flex:1;min-width:150px;min-height:83px;display:flex;align-items:center;justify-content:center;gap:13px;border:3px solid transparent;border-radius:21px;cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .15s,border-color .15s;position:relative}
+.tool:hover{transform:translateY(-2px)}.tool:focus-visible,.word:focus-visible,.action:focus-visible{outline:4px solid #ffe06b;outline-offset:4px}
+.tool .letter{background:#fff;font-size:26px;font-weight:1000;min-width:43px;padding:8px;border-radius:13px;line-height:1;text-align:center}
+.tool .name{font-size:21px;font-weight:1000;white-space:nowrap}
+.tool .example{display:block;font-size:12px;font-weight:bold;opacity:.9;margin-top:2px}
+.tool[data-tag="noun"]{background:var(--redbg);color:var(--red)}
+.tool[data-tag="verb"]{background:var(--greenbg);color:var(--green)}
+.tool[data-tag="adjective"]{background:var(--yellowbg);color:#8a6700}
+.tool.selected{border-color:#fff;box-shadow:0 5px 0 rgba(255,255,255,.75),0 9px 13px rgba(23,44,64,.1);transform:translateY(-3px)}
+.word-board{margin-top:18px;border:3px dashed rgba(255,255,255,.48);border-radius:24px;background:var(--panel3);padding:28px 16px 18px;text-align:center;position:relative}
+.paperclip{position:absolute;top:-16px;left:24px;font-size:27px;transform:rotate(-24deg)}
+.sentence{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:4px 5px;min-height:94px}
+.word{border:2px solid #d4e0ef;border-bottom:5px solid #d4e0ef;border-radius:14px;background:#fff;min-width:auto;padding:12px 10px 7px;cursor:pointer;font:inherit;color:#1f395f;transition:transform .12s,background .2s;display:flex;flex-direction:column;align-items:center;gap:7px;position:relative}
+.word:hover:not(:disabled){transform:translateY(-2px);border-color:#a9c1dc}
+.word .word-text{font-size:clamp(24px,3vw,35px);font-weight:1000;line-height:1.05;white-space:nowrap}
+.word .word-tag{font-size:13px;font-weight:1000;line-height:1;min-height:24px;border-radius:8px;min-width:58px;padding:5px 8px;background:#edf2f7;color:#8e9cae;transition:.15s}
+/* Strong, easily differentiated filled word cards on the blue sentence board. */
+.word.done-noun{background:#f6a0a9;border-color:#da474f;color:#33212b;box-shadow:inset 0 2px 0 #ffd1d4}
+.word.done-noun .word-tag{background:#bd2738;color:#fff}
+.word.done-verb{background:#91dfae;border-color:#218c58;color:#193e2c;box-shadow:inset 0 2px 0 #c4f5d8}
+.word.done-verb .word-tag{background:#187746;color:#fff}
+.word.done-adjective{background:#ffe079;border-color:#c79a0c;color:#453509;box-shadow:inset 0 2px 0 #fff0ad}
+.word.done-adjective .word-tag{background:#a47800;color:#fff}
+.word.wrong{animation:shake .33s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+.bubble{margin:15px auto 4px;font-size:16px;font-weight:800;color:#eff6ff;min-height:24px}
+.bubble.success{color:#fff7c7;font-size:21px}.bubble.tryagain{color:#ffd9d9}
+.progress-wrap{margin-top:8px;display:flex;align-items:center;gap:10px;font-weight:900;color:#eaf3ff;font-size:13px}
+.progress-bar{background:#7ea8de;height:14px;border-radius:99px;overflow:hidden;flex:1}.progress-bar>div{height:100%;background:linear-gradient(90deg,#a2f3c8,#22b06e);border-radius:inherit;width:0%;transition:width .35s}
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.action{font-family:inherit;font-weight:900;font-size:14px;padding:10px 14px;border-radius:13px;border:2px solid #f4c996;background:#ffd8ac;color:#7a4a11;cursor:pointer;transition:transform .12s,filter .12s}
+.action:hover{transform:translateY(-1px);filter:brightness(1.02)}.action.primary{background:#ffe4bf;border-color:#f4c996;color:#7a4a11;box-shadow:none}.action.speak{background:#ffe0b7;color:#7a4a11}
+/* Solid medium-blue voice settings panel, designed for a classroom Smartboard. */
+.voice-panel{margin-top:16px;padding:13px 15px;background:var(--panel4);border:3px solid rgba(255,255,255,.3);border-radius:20px;color:#fff;position:relative}
+.voice-panel-heading{font-size:16px;font-weight:1000;display:block;margin:0 0 2px}
+.voice-hint{margin:0 0 10px;font-weight:700;line-height:1.35;font-size:13px;color:#edf4ff}
+.voice-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.voice-controls select{font:inherit;font-size:14px;font-weight:800;background:#fff;color:#234a7a;border:2px solid #bed6f3;border-radius:12px;padding:9px 10px;min-height:40px;max-width:100%}
+#voice-picker{flex:2 1 250px;min-width:180px}
+#voice-speed{flex:1 1 145px;min-width:130px}
+.voice-controls .action{padding:8px 12px;background:#dcedff;color:#204976;border-color:#fff;white-space:nowrap;font-size:13px}
+.voice-status{margin-top:8px;font-size:12px;color:#eff6ff;font-weight:800;line-height:1.35}
+.legend{display:flex;gap:11px;flex-wrap:wrap;justify-content:center;margin:14px 0 0;color:#eef5ff;font-size:13px;font-weight:800}
+.legend b{display:inline-block;width:13px;height:13px;border-radius:5px;margin-right:5px;vertical-align:middle}
+.footer{padding:18px 10px 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#edf5ff;font-size:12px;font-weight:bold}
+.printsheet{display:none}
+.confetti{position:absolute;pointer-events:none;inset:0;overflow:hidden}.piece{position:absolute;top:-20px;width:12px;height:17px;opacity:0;animation:fall 1.65s ease-in forwards}@keyframes fall{5%{opacity:1}100%{opacity:0;transform:translate(var(--x),490px) rotate(var(--r))}}
+@media(max-width:640px){.app{padding:13px 12px 30px}.mascot{width:57px;height:57px;font-size:34px;border-radius:19px}.options{padding:15px;gap:13px}.main-panel{padding:19px 13px 23px}.tool{min-width:95px;min-height:67px;gap:5px;flex-direction:column}.tool .letter{font-size:19px;min-width:33px;padding:5px}.tool .name{font-size:15px}.tool .example{display:none}.tools{gap:6px}.word-board{padding:29px 8px 18px}.word{min-width:auto;padding:10px 6px 6px;gap:6px}.word .word-text{font-size:clamp(21px,6vw,29px)}.word .word-tag{min-width:57px;font-size:12px}.sentence{gap:3px}.topstar{display:none}.action{font-size:13px;padding:9px 11px}.stats{width:100%;justify-content:space-between}.stat{flex:1}}
+
+/* Classroom layout: small labeling palette below the sentence, with stable, familiar read-aloud placement. */
+.settings-left{flex:1 1 580px;min-width:0}
+.top-picker-row{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.top-action{padding:10px 12px;font-size:13px;min-height:45px;white-space:nowrap;background:#ffe1b8;border-color:#f4c996;color:#754710}
+.new-sentence-row{display:flex;justify-content:flex-start;margin:18px 0 0}
+.new-sentence-row .action{font-size:14px;padding:10px 14px;min-height:44px}
+.word-board{margin-top:12px;padding-bottom:16px}
+.board-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:19px}
+.board-actions .action{font-size:14px;min-height:43px;padding:10px 15px}
+.board-actions #read{background:#ffdfb7}
+.board-actions #show{background:#ffdfb7}
+.tools{margin:15px 0 0;justify-content:center;gap:10px}
+.tool{flex:0 1 170px;min-width:0;max-width:170px;min-height:47px;padding:5px 10px;gap:8px;border-radius:13px;border-width:2px}
+.tool .letter{font-size:17px;min-width:29px;padding:5px;border-radius:8px}
+.tool .name{font-size:16px;line-height:1.15}
+.tool.selected{box-shadow:0 3px 0 rgba(255,255,255,.72),0 6px 12px rgba(23,44,64,.12);transform:translateY(-2px)}
+/* Keep the two tools in the sentence field in their designated corners even on narrow screens. */
+@media(max-width:640px){
+  .settings-left{flex:1 1 100%}
+  .top-picker-row{gap:6px}
+  .top-action{font-size:12px;padding:8px 10px;min-height:38px}
+  .new-sentence-row{margin-top:14px}
+  .word-board{margin-top:12px;padding:26px 8px 14px}
+  .board-actions{gap:7px;margin-top:15px}
+  .board-actions .action{font-size:12px;padding:9px 9px;min-height:42px}
+  .tools{display:flex;flex-wrap:nowrap;gap:6px;margin-top:12px}
+  .tool{flex:1 1 0;max-width:170px;min-width:0;min-height:45px;flex-direction:row;gap:4px;padding:6px 3px;border-radius:12px}
+  .tool .letter{font-size:13px;min-width:22px;padding:4px 2px}
+  .tool .name{font-size:clamp(12px,3.7vw,15px)}
+}
+
+/* Calm classroom mode: keep students' eyes on the sentence, not the controls. */
+body{background:#d8e8f9}
+.app{max-width:1100px;padding-top:22px}
+header{margin-bottom:16px}
+.mascot{width:57px;height:57px;font-size:34px;border-width:2px;border-radius:17px;box-shadow:none;transform:none}
+h1{font-size:clamp(27px,3.5vw,39px);letter-spacing:-.9px;color:#24486e}
+h1 span{color:#286caa}
+.subtitle{color:#557ba4;font-size:13px;font-weight:700;margin-top:4px}
+.panel{border:0;border-radius:22px;box-shadow:0 6px 20px rgba(38,79,132,.09)}
+.options{padding:14px 19px;margin-bottom:16px;background:#a9cef1;gap:10px}
+.option-caption{font-size:11px;margin-bottom:6px;color:#2d5b8b;letter-spacing:.4px}
+.segment{background:#93bde7;border-radius:12px;padding:4px;gap:3px}
+.segment button{padding:9px 11px;font-size:14px;border-radius:9px}
+.segment button.active{box-shadow:none}
+.top-picker-row{gap:7px}
+.top-action{background:#ffe4c3;color:#81511d;border:1px solid #f6d19d;font-size:12px;min-height:39px;padding:8px 11px}
+.stats{gap:14px}
+.stat{padding:3px 3px;background:transparent;border:0;border-radius:0;color:#375f8c;min-width:64px;font-size:11px}
+.stat b{color:#234f82;font-size:23px;margin-bottom:1px}
+.main-panel{background:#82b0e0;padding:21px 22px 19px}
+.main-panel:before{display:none}
+.task-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 13px}
+.new-sentence-row{margin:0}
+.new-sentence-row .action{background:#ffe4c3;border:1px solid #f4cd99;color:#754514;font-size:14px;font-weight:900;padding:10px 14px;min-height:42px;box-shadow:none}
+.directions{font-size:14px;font-weight:800;color:#204d80;margin:0}
+.word-board{background:#205493;margin:0;border:0;border-radius:19px;padding:24px 18px 20px;box-shadow:0 2px 7px rgba(22,63,116,.14)}
+.sentence{min-height:148px;gap:4px 3px;align-items:flex-start;justify-content:flex-start;background:linear-gradient(#ffffff,#ffffff) padding-box,linear-gradient(to bottom,transparent 0 11px,#98a7bb 11px 13px,transparent 13px 41px,#98a7bb 41px 43px,transparent 43px 56px) 0 0/100% 56px repeat-y,repeating-linear-gradient(to right,#98a7bb 0 10px,transparent 10px 18px) 0 27px/100% 2px repeat-y;border-radius:15px;padding:18px 14px 14px;border:3px solid rgba(255,255,255,.35)}
+.word{padding:7px 7px 4px;gap:4px;border:1px solid rgba(104,122,148,.18);border-bottom:2px solid rgba(104,122,148,.25);border-radius:8px;background:rgba(255,255,255,.94);box-shadow:none}
+.word .word-text{font-size:clamp(24px,3vw,37px);line-height:1.02}
+.word .word-tag{background:#eef2f7;color:#92a0b2;min-width:42px;padding:3px 6px;min-height:18px;font-size:11px}
+.bubble{margin:12px auto 0;min-height:21px;font-size:14px;color:#e5effd}
+.bubble:empty{margin:3px auto 0;min-height:0}
+.bubble.success{font-size:17px}
+.progress-wrap{margin-top:8px;gap:12px;opacity:.8;font-size:11px}
+.progress-bar{height:7px;background:#5783bb}
+.progress-bar>div{background:#89e3b9}
+.board-actions{margin-top:22px;gap:12px}
+.board-actions .action{font-size:13px;min-height:40px;padding:9px 13px;border:1px solid #f4ca97;border-radius:11px;background:#ffdfb8;color:#79501e}
+.tools{margin:14px 0 0;gap:9px}
+.tool{flex:0 1 151px;max-width:151px;min-height:45px;gap:6px;border:0;border-radius:11px;box-shadow:none;padding:7px}
+.tool .letter{font-size:14px;min-width:25px;padding:4px 5px;border-radius:6px}
+.tool .name{font-size:15px}
+.tool.selected{border:0;outline:3px solid #fff;outline-offset:0;box-shadow:0 2px 0 rgba(19,65,110,.2);transform:none}
+.tool:hover{transform:translateY(-1px)}
+.voice-panel{margin:19px 0 0;background:#a0c5eb;color:#285584;border:0;border-radius:13px;padding:0;box-shadow:none}
+.voice-panel-heading{display:list-item;list-style-position:inside;font-size:13px;font-weight:900;cursor:pointer;user-select:none;padding:10px 13px;margin:0;color:#2f5a8c}
+.voice-panel-heading::marker{font-size:10px}
+.voice-summary-note{font-weight:700;color:#4c7198}
+.voice-panel-content{padding:0 13px 13px}
+.voice-hint{color:#345e8b;font-size:12px;margin:0 0 8px}
+.voice-controls select{padding:8px;font-size:13px;min-height:39px;border-color:#d2e5f8}
+.voice-controls .action{border:1px solid #d2e5f8;padding:7px 10px;font-size:12px}
+.voice-status{color:#345e8b;font-size:11px}
+@media(max-width:640px){
+ .app{padding:12px 10px 20px}
+ header{margin-bottom:11px}
+ .mascot{width:48px;height:48px;font-size:28px}
+ h1{font-size:30px}
+ .options{padding:12px;gap:10px}
+ .stat{min-width:53px}
+ .main-panel{padding:14px 11px 14px}
+ .task-heading{margin:0 0 12px;gap:8px}
+ .directions{font-size:12px}
+ .word-board{padding:24px 7px 16px}
+ .sentence{gap:3px;min-height:122px;padding:14px 8px 12px}
+ .word{padding:10px 6px 6px;gap:5px;border-radius:8px}
+ .word .word-text{font-size:clamp(20px,5.5vw,29px)}
+ .word .word-tag{min-width:33px;font-size:10px;padding:4px 3px}
+ .board-actions{margin-top:13px;gap:7px}
+ .board-actions .action{font-size:12px;min-height:42px;padding:9px 10px}
+ .tools{gap:6px;margin-top:12px}
+ .tool{flex:1 1 0;min-width:0;max-width:none;min-height:44px}
+ .tool .letter{font-size:12px;min-width:19px;padding:3px}
+ .tool .name{font-size:clamp(11px,3.3vw,14px)}
+ .voice-panel{margin-top:14px}
+}
+
+
+/* Tiny teacher-only speaker reveals the voice settings on demand. */
+.palette-row{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;column-gap:5px;margin:14px 0 0}
+.palette-row .tools{grid-column:2;margin:0;justify-content:center;gap:9px}
+.voice-toggle{grid-column:3;width:40px;height:40px;align-self:center;justify-self:center;border:1px solid #bcd9f0;border-radius:12px;background:#b9d7f2;color:#1f4f84;font-size:21px;line-height:1;cursor:pointer;padding:0;box-shadow:none}
+.voice-toggle:hover,.voice-toggle[aria-expanded="true"]{background:#d7eafa}
+.voice-toggle:focus-visible{outline:3px solid #ffe06b;outline-offset:3px}
+.voice-panel[hidden]{display:none!important}
+.voice-panel{margin:12px 0 0;padding:14px 15px;background:#bbd8f1;border-radius:13px}
+.voice-panel-content{padding:0}
+.voice-hint{font-weight:900;font-size:13px;color:#295683;margin:0 0 11px}
+@media(max-width:640px){
+ .palette-row{grid-template-columns:20px minmax(0,1fr) 34px;gap:4px;margin-top:12px}
+ .palette-row .tools{gap:5px;margin:0}
+ .voice-toggle{width:34px;height:38px;font-size:18px;border-radius:10px}
+ .voice-panel{margin-top:10px;padding:12px 9px}
+}
+
+@media print{body{background:#fff}.app{display:none}.printsheet{display:block;color:#111;font-family:Arial,sans-serif;padding:12px 25px}.printsheet h1{font-size:28px;color:#111}.print-row{font-size:23px;margin:0 0 20px;padding:10px 0 18px;border-bottom:1px solid #ccc}.print-row span{display:inline-block;margin:0 13px 0 0;min-width:60px;border-bottom:1px solid #444;padding:0 2px 14px}.print-row small{display:block;color:#555;font-size:12px;margin-bottom:8px}.print-footer{margin-top:18px;font-size:13px}}
+
+/* Primary-print letters for readers; retain familiar UI controls. */
+.word .word-text{
+  font-family:"Comic Sans MS","Comic Sans","Trebuchet MS",sans-serif;
+  font-weight:700;
+  font-size:clamp(26px,3.05vw,38px);
+  letter-spacing:.05px;
+  line-height:1.10;
+}
+@media(max-width:640px){
+  .word .word-text{font-size:clamp(21px,5.5vw,30px)}
+}
+
+/* Compact teacher dropdowns minimize classroom clutter. */
+.settings-select{display:flex;flex-direction:column;gap:4px;color:#2a5987;font-weight:900;font-size:11px;letter-spacing:.1px;white-space:nowrap}
+.settings-select select{font-family:inherit;font-size:14px;font-weight:800;color:#23486c;background:#fff;border:1px solid #89b2da;border-radius:10px;padding:8px 29px 8px 10px;min-height:39px;cursor:pointer;max-width:100%}
+.level-select select{font-size:13px}
+.top-picker-row{align-items:flex-end;gap:9px}
+.top-action{min-height:39px}
+.task-heading{min-height:22px}
+/* Three actions always have predictable places: left, center, right. */
+.board-actions{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:9px}
+.board-actions #read{justify-self:start}
+.board-actions #next{justify-self:center;background:#ffe4c3;color:#754514;border:1px solid #f4cd99;min-height:40px}
+.board-actions #show{justify-self:end}
+@media(max-width:640px){
+ .top-picker-row{align-items:flex-end;gap:7px}
+ .settings-select select{min-height:38px;font-size:12px;padding:7px 24px 7px 7px}
+ .board-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+ .board-actions .action{width:100%;min-width:0;white-space:normal;font-size:11px;padding:8px 3px;line-height:1.17;min-height:43px}
+ .board-actions #next{min-height:43px}
+}
+
+/* Extra-roomy clean sentence board: keep the white box roomy and center the sentence. */
+.word-board{
+  min-height:420px;
+  padding:28px 18px 24px;
+  display:flex;
+  flex-direction:column;
+}
+.sentence{
+  flex:1 1 auto;
+  min-height:240px;
+  padding:14px;
+  align-content:center;
+  justify-content:center;
+  align-items:center;
+  background:#fdfefe;
+}
+.word{
+  min-height:58px;
+  padding:8px 8px 5px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.word .word-text{
+  margin-top:0;
+  line-height:1;
+}
+.word .word-tag{
+  margin-top:4px;
+}
+.board-actions{
+  margin-top:18px;
+}
+@media(max-width:640px){
+  .word-board{min-height:310px;padding:22px 8px 18px;}
+  .sentence{min-height:188px;padding:10px 8px 12px;}
+  .word{min-height:52px;padding:6px 5px 4px;}
+  .word .word-text{margin-top:0;}
+}
+
+</style>
+</head>
+<body>
+<main class="app">
+<header><div class="logo"><div class="mascot" aria-hidden="true">🌱</div><div><h1>Sentence <span>Sprouts!</span></h1><p class="subtitle">Nouns · Verbs · Adjectives</p></div></div></header>
+<section class="panel options" aria-label="Activity settings">
+  <div class="settings-left">
+    <div class="top-picker-row">
+      <label class="settings-select" for="length-picker">Sentence length
+        <select id="length-picker" aria-label="Sentence length">
+          <option value="mix">🎲 Mixed lengths</option>
+          <option value="short">🌱 3 words</option>
+          <option value="long">🌳 5 words</option>
+        </select>
+      </label>
+      <button id="print" class="action top-action" type="button">🖨️ Print practice</button>
+      <button id="sound" class="action top-action" type="button" aria-pressed="true">♪ Sounds on</button>
+      <label class="settings-select level-select" for="level-picker">Level
+        <select id="level-picker" aria-label="Choose difficulty level">
+          <option value="1">Level 1 · Label all</option>
+          <option value="2">Level 2 · Some blank</option>
+        </select>
+      </label>
+    </div>
+  </div>
+  <div class="stats"><div class="stat"><b id="solved">0</b>Sentences</div><div class="stat"><b id="streak">0</b>In a row</div></div>
+</section>
+<section class="panel main-panel">
+  <div class="task-heading">
+    <p id="directions" class="directions">Choose a color. Tap the matching words.</p>
+  </div>
+  <div class="word-board">
+    <div id="sentence" class="sentence" aria-label="Sentence to label"></div>
+    <div id="feedback" class="bubble" aria-live="polite"></div>
+    <div class="progress-wrap"><span id="progress-label">0 of 3 labeled</span><div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-fill"></div></div></div>
+    <div class="board-actions">
+      <button id="read" class="action speak" type="button" aria-label="Read the sentence aloud">🔊 Read aloud</button>
+      <button id="next" class="action primary" type="button">↻ New sentence</button>
+      <button id="show" class="action" type="button">👀 Show answers</button>
+    </div>
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+  </div>
+  <div class="palette-row">
+    <div class="tools" role="group" aria-label="Choose a part of speech">
+      <button class="tool selected" data-tag="noun" type="button" aria-pressed="true"><span class="letter">N</span><span class="name">Noun</span></button>
+      <button class="tool" data-tag="verb" type="button" aria-pressed="false"><span class="letter">V</span><span class="name">Verb</span></button>
+      <button class="tool" data-tag="adjective" type="button" aria-pressed="false"><span class="letter">Adj</span><span class="name">Adjective</span></button>
+    </div>
+    <button id="voice-toggle" class="voice-toggle" type="button" aria-expanded="false" aria-controls="voice-panel" aria-label="Open voice settings" title="Voice settings">🔊</button>
+  </div>
+<section id="voice-panel" class="voice-panel" aria-label="Read-aloud voice settings" hidden>
+  <div class="voice-panel-content">
+  <p class="voice-hint">🎙️ Voice settings — Clara preferred</p>
+  <p class="voice-hint">Choose a voice or reading speed for the class.</p>
+  <div class="voice-controls">
+    <select id="voice-picker" aria-label="Reading voice"><option value="auto">⭐ Microsoft Clara, if available</option></select>
+    <select id="voice-speed" aria-label="Reading speed"><option value="0.9" selected>🐢 Gentle pace</option><option value="1">Normal pace</option><option value="0.75">Extra slow</option></select>
+    <button id="voice-test" class="action" type="button">▶ Try this voice</button>
+    <button id="voice-refresh" class="action" type="button">↻ Find voices</button>
+  </div>
+  <div class="voice-status" id="voice-status" aria-live="polite">Looking for voices on this computer…</div>
+  </div>
+</section>
+</section>
+</main><section id="printsheet" class="printsheet" aria-label="Printable practice worksheet"></section>
+<script>
+'use strict';
+// A constrained sentence generator: each subject is paired only with sensible actions
+// and objects. Every generated word is an unambiguous noun, verb, or adjective.
+const scenes=[
+{heads:['Tiny frogs','Green frogs','Happy frogs'],short:['hop','jump','croak','swim'],long:[['catch','little flies'],['watch','blue dragonflies'],['spot','tiny bugs']]},
+{heads:['Playful puppies','Fluffy puppies','Happy puppies'],short:['bark','run','play','jump'],long:[['chase','yellow balls'],['fetch','red sticks'],['sniff','pretty flowers']]},
+{heads:['Sleepy kittens','Curious kittens','Little kittens'],short:['purr','nap','play','stretch'],long:[['chase','tiny mice'],['watch','small birds'],['catch','soft toys']]},
+{heads:['Fast rabbits','White rabbits','Small rabbits'],short:['hop','run','jump','rest'],long:[['eat','crunchy carrots'],['munch','green lettuce'],['sniff','yellow flowers']]},
+{heads:['Bright birds','Blue birds','Little birds'],short:['sing','chirp','fly','flutter'],long:[['gather','small twigs'],['peck','juicy berries'],['build','cozy nests']]},
+{heads:['Yellow ducks','Little ducks','Funny ducks'],short:['quack','waddle','swim','splash'],long:[['eat','tasty seeds'],['chase','tiny bugs'],['follow','white geese']]},
+{heads:['Busy bees','Little bees','Happy bees'],short:['buzz','fly','hum','hover'],long:[['visit','yellow flowers'],['gather','sweet nectar'],['explore','bright gardens']]},
+{heads:['Pretty butterflies','Colorful butterflies','Small butterflies'],short:['flutter','glide','fly','rest'],long:[['visit','purple flowers'],['explore','sunny gardens'],['cross','green meadows']]},
+{heads:['Gentle horses','Brown horses','Strong horses'],short:['trot','gallop','run','rest'],long:[['carry','little riders'],['eat','fresh hay'],['sniff','sweet apples']]},
+{heads:['Sleepy bears','Brown bears','Big bears'],short:['sleep','stretch','snore','rest'],long:[['munch','ripe berries'],['catch','slippery fish'],['climb','tall trees']]},
+{heads:['Silly monkeys','Playful monkeys','Little monkeys'],short:['climb','swing','chatter','jump'],long:[['eat','ripe bananas'],['grab','green leaves'],['watch','bright parrots']]},
+{heads:['Slow turtles','Tiny turtles','Green turtles'],short:['crawl','rest','swim','hide'],long:[['munch','green lettuce'],['find','smooth stones'],['explore','sandy beaches']]},
+{heads:['Fluffy penguins','Little penguins','Happy penguins'],short:['waddle','slide','swim','hop'],long:[['catch','small fish'],['cross','icy paths'],['follow','fluffy chicks']]},
+{heads:['Playful dolphins','Friendly dolphins','Smart dolphins'],short:['jump','swim','leap','dive'],long:[['chase','little fish'],['splash','cool water'],['explore','blue oceans']]},
+{heads:['Quick squirrels','Brown squirrels','Busy squirrels'],short:['scurry','climb','chatter','leap'],long:[['gather','brown acorns'],['hide','tasty nuts'],['carry','tiny twigs']]},
+{heads:['Pretty flowers','Yellow flowers','Bright flowers'],short:['bloom','sway','grow','droop'],long:[['attract','busy bees'],['brighten','sunny gardens'],['welcome','colorful butterflies']]},
+{heads:['Tall trees','Green trees','Leafy trees'],short:['sway','grow','bend','rustle'],long:[['shelter','small birds'],['drop','brown leaves'],['shade','little flowers']]},
+{heads:['Happy children','Creative children','Kind children'],short:['laugh','play','dance','smile'],long:[['draw','colorful pictures'],['read','funny stories'],['build','tall towers']]},
+{heads:['Friendly teachers','Kind teachers','Happy teachers'],short:['smile','wave','laugh','sing'],long:[['read','funny books'],['teach','new songs'],['draw','bright pictures']]},
+{heads:['Creative artists','Young artists','Talented artists'],short:['paint','sketch','draw','smile'],long:[['paint','bright murals'],['draw','silly faces'],['create','pretty pictures']]},
+{heads:['Busy bakers','Happy bakers','Careful bakers'],short:['knead','bake','smile','work'],long:[['bake','sweet cookies'],['mix','fluffy batter'],['decorate','yummy cakes']]},
+{heads:['Helpful gardeners','Busy gardeners','Kind gardeners'],short:['dig','plant','smile','work'],long:[['plant','pretty flowers'],['grow','red tomatoes'],['pick','ripe berries']]},
+{heads:['Brave firefighters','Helpful firefighters','Strong firefighters'],short:['hurry','help','run','wave'],long:[['carry','heavy hoses'],['rescue','small kittens'],['climb','tall ladders']]},
+{heads:['Brave astronauts','Happy astronauts','Curious astronauts'],short:['float','wave','explore','smile'],long:[['spot','bright stars'],['visit','distant planets'],['wear','white helmets']]},
+{heads:['Friendly robots','Little robots','Silly robots'],short:['beep','march','dance','wave'],long:[['carry','heavy boxes'],['sort','colorful blocks'],['stack','wooden cubes']]},
+{heads:['Cheerful pirates','Brave pirates','Funny pirates'],short:['sail','cheer','laugh','dance'],long:[['find','hidden treasure'],['raise','red flags'],['explore','sandy islands']]},
+{heads:['Happy snowmen','Little snowmen','Funny snowmen'],short:['melt','smile','stand','lean'],long:[['wear','colorful scarves'],['wear','woolly hats'],['hold','long brooms']]},
+{heads:['Friendly dragons','Little dragons','Green dragons'],short:['fly','roar','sleep','soar'],long:[['breathe','hot flames'],['guard','golden coins'],['chase','fluffy clouds']]}
+];
+const nameSentences=[
+['Mia','draws','colorful','birds'],['Liam','builds','tall','towers'],['Ava','reads','funny','stories'],['Noah','paints','blue','stars'],['Ella','plants','pretty','flowers'],['Owen','kicks','red','balls'],['Zoe','feeds','hungry','ducks'],['Jack','carries','heavy','books'],['Ruby','makes','colorful','planes'],['Leo','finds','shiny','rocks'],['Emma','wears','purple','boots'],['Ben','draws','silly','faces']
+];
+// Level 2 adds unlabeled articles and prepositions, but never linking/helping verbs.
+// Every sentence in this bank has exactly five words: article, noun, action verb,
+// preposition, noun. The relationship is hand-picked to avoid nonsense sentences.
+const level2Places=[
+ ['frogs','hop','over','logs'],
+ ['frogs','swim','in','ponds'],
+ ['puppies','run','through','parks'],
+ ['kittens','sleep','on','blankets'],
+ ['rabbits','hop','over','logs'],
+ ['birds','sing','in','trees'],
+ ['ducks','swim','in','ponds'],
+ ['bees','buzz','near','flowers'],
+ ['butterflies','flutter','over','flowers'],
+ ['horses','trot','through','fields'],
+ ['bears','sleep','in','caves'],
+ ['monkeys','swing','through','trees'],
+ ['turtles','crawl','on','sand'],
+ ['penguins','slide','on','ice'],
+ ['dolphins','swim','through','waves'],
+ ['squirrels','climb','up','trees'],
+ ['children','play','in','yards'],
+ ['teachers','read','to','children'],
+ ['artists','paint','on','paper'],
+ ['gardeners','work','in','gardens'],
+ ['firefighters','run','to','trucks'],
+ ['robots','march','through','halls'],
+ ['pirates','sail','across','oceans'],
+ ['dragons','fly','over','mountains']
+];
+let selected='noun',length='mix',level=1,words=[],solved=0,streak=0,completed=false,revealed=false,soundOn=true,lastSentences=[],audioCtx=null;
+const $=id=>document.getElementById(id);
+const choose=arr=>arr[Math.floor(Math.random()*arr.length)];
+// The browser, not the HTML file, supplies voices. Clara is preferred, never fabricated.
+const VOICE_STORAGE_KEY='sentence-sprouts-chosen-voice-v1';
+let availableVoices=[];
+let chosenVoiceKey='auto';
+try{chosenVoiceKey=localStorage.getItem(VOICE_STORAGE_KEY)||'auto'}catch(e){}
+function voiceKey(v){return v.name+'|'+v.lang+'|'+v.voiceURI}
+function englishVoice(v){return /^en([_-]|$)/i.test(v.lang||'')}
+function voiceRank(v){
+  const name=v.name||'';
+  if(/\bclara\b/i.test(name))return 1000;
+  if(/microsoft/i.test(name)&&/natural|online/i.test(name))return 800;
+  if(/microsoft/i.test(name)&&/jenny|aria|sonia|ava|emma/i.test(name))return 700;
+  if(/google us english/i.test(name))return 600;
+  if(/microsoft/i.test(name)&&/zira|hazel/i.test(name))return 500;
+  if(/google/i.test(name))return 400;
+  return 100+(v.default?20:0);
+}
+function preferredVoice(){return availableVoices[0]||null}
+function activeVoice(){
+  return (chosenVoiceKey==='auto'?null:availableVoices.find(v=>voiceKey(v)===chosenVoiceKey))||preferredVoice();
+}
+function voiceStatus(){
+  const text=$('voice-status');
+  if(!('speechSynthesis' in window)){
+    text.textContent='This browser does not support reading aloud.';
+    return;
+  }
+  if(!availableVoices.length){text.textContent='Still looking for English voices. Tap “Find voices” if none appear.';return;}
+  const chosen=activeVoice();
+  if(!chosen){text.textContent='No English voice is available in this browser.';return;}
+  const isClara=/\bclara\b/i.test(chosen.name);
+  const unavailable=chosenVoiceKey!=='auto'&&!availableVoices.some(v=>voiceKey(v)===chosenVoiceKey);
+  text.textContent=(isClara?'💚 Clara is ready! ':'🔊 Using ')+
+    chosen.name+
+    (unavailable?' (Your saved choice is not offered here; using a fallback.)':'')+
+    (chosen.localService?' • On-device voice':' • May need internet access');
+}
+function refreshVoices(){
+  if(!('speechSynthesis' in window)){
+    $('voice-picker').disabled=true;$('voice-speed').disabled=true;
+    $('voice-test').disabled=true;$('voice-refresh').disabled=true;
+    voiceStatus();return;
+  }
+  availableVoices=window.speechSynthesis.getVoices().filter(englishVoice)
+    .sort((a,b)=>voiceRank(b)-voiceRank(a)||a.name.localeCompare(b.name));
+  const select=$('voice-picker');
+  const current=select.value;
+  select.replaceChildren();
+  const auto=document.createElement('option');auto.value='auto';
+  auto.textContent='⭐ Clara / best available (automatic)';select.appendChild(auto);
+  for(const voice of availableVoices){
+    const option=document.createElement('option');
+    option.value=voiceKey(voice);
+    option.textContent=voice.name+' ('+voice.lang+')'+(/\bclara\b/i.test(voice.name)?' ⭐':'');
+    select.appendChild(option);
+  }
+  const desired=chosenVoiceKey!=='auto'?chosenVoiceKey:current;
+  select.value=Array.from(select.options).some(o=>o.value===desired)?desired:'auto';
+  voiceStatus();
+}
+function speakText(text){
+  if(!('speechSynthesis' in window)){
+    setFeedback('Reading aloud is not supported by this browser.');return;
+  }
+  try{
+    refreshVoices();
+    const utterance=new SpeechSynthesisUtterance(text);
+    const chosen=activeVoice();
+    if(chosen){utterance.voice=chosen;utterance.lang=chosen.lang}
+    else utterance.lang='en-US';
+    utterance.rate=Number($('voice-speed').value)||0.9;
+    utterance.pitch=1; // Keep natural voices natural; raising pitch can sound robotic.
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  }catch(e){setFeedback('This voice could not start. Please try a different voice.','tryagain')}
+}
+
+function generate(targetLength=length){
+  let made=[];let tries=0;
+  do{
+    const useLong=targetLength==='long'||(targetLength==='mix'&&Math.random()>.43);
+    const scene=choose(scenes);
+    const [adj,noun]=choose(scene.heads).split(' ');
+    if(level===2){
+      // Three words: The frogs hop. Four: The tiny frogs hop.
+      // Five: The happy frogs catch flies. OR The frogs hop over logs.
+      const four=targetLength==='mix'&&Math.random()<.16;
+      if(useLong && !four && Math.random()<.48){
+        const [subject,verb,prep,place]=choose(level2Places);
+        made=[{text:'The',tag:null},{text:subject,tag:'noun'},
+              {text:verb,tag:'verb'},{text:prep,tag:null},{text:place,tag:'noun'}];
+      }else if(useLong && !four){
+        const [verb,object]=choose(scene.long);
+        const objectNoun=object.split(' ')[1];
+        made=[{text:'The',tag:null},{text:adj.toLowerCase(),tag:'adjective'},
+              {text:noun,tag:'noun'},{text:verb,tag:'verb'},{text:objectNoun,tag:'noun'}];
+      }else if(four){
+        made=[{text:'The',tag:null},{text:adj.toLowerCase(),tag:'adjective'},
+              {text:noun,tag:'noun'},{text:choose(scene.short),tag:'verb'}];
+      }else{
+        made=[{text:'The',tag:null},{text:noun,tag:'noun'},
+              {text:choose(scene.short),tag:'verb'}];
+      }
+    }else if(targetLength==='mix' && Math.random()<.12){
+      const [name,verb,objAdj,objNoun]=choose(nameSentences);
+      made=[{text:name,tag:'noun'},{text:verb,tag:'verb'},
+            {text:objAdj,tag:'adjective'},{text:objNoun,tag:'noun'}];
+    }else{
+      made=[{text:adj,tag:'adjective'},{text:noun,tag:'noun'}];
+      if(useLong){
+        const [verb,object]=choose(scene.long),[objectAdj,objectNoun]=object.split(' ');
+        made.push({text:verb,tag:'verb'},
+                  {text:objectAdj,tag:'adjective'},{text:objectNoun,tag:'noun'});
+      }else made.push({text:choose(scene.short),tag:'verb'});
+    }
+    tries++;
+  }while(lastSentences.includes(made.map(w=>w.text).join(' '))&&tries<40);
+  const sentence=made.map(w=>w.text).join(' ');
+  lastSentences.push(sentence);
+  if(lastSentences.length>15)lastSentences.shift();
+  made[0].text=made[0].text.charAt(0).toUpperCase()+made[0].text.slice(1);
+  return made;
+}
+function updateDirections(){
+  $('directions').textContent=level===1
+   ?'Choose a color. Tap the matching words.'
+   :'Choose a color. Label only nouns, action verbs, and adjectives. Leave other words blank.';
+}
+function sentenceText(){return words.map((w,i)=>w.text+(i===words.length-1?'.':'')).join(' ')}
+function markProgress(){
+ const targets=words.filter(w=>w.tag!==null);
+ const marked=targets.filter(w=>w.marked).length;
+ const ratio=Math.round(marked/targets.length*100);
+ $('progress-label').textContent=marked+' of '+targets.length+' labeled';
+ $('progress-fill').style.width=ratio+'%';
+ document.querySelector('.progress-bar').setAttribute('aria-valuenow',ratio);
+}
+function setFeedback(message,style=''){$('feedback').className='bubble '+style;$('feedback').textContent=message}
+function render(){
+ const host=$('sentence');host.replaceChildren();
+ words.forEach((w,i)=>{
+   const b=document.createElement('button');b.type='button';
+   b.className='word'+(w.marked?' done-'+w.tag:'');
+   b.disabled=!!w.marked || (completed && w.tag===null);
+   b.setAttribute('aria-label',w.text+(w.marked?' labeled '+w.tag:''));
+   const text=document.createElement('span');text.className='word-text';
+   text.textContent=w.text+(i===words.length-1?'.':'');
+   const tag=document.createElement('span');tag.className='word-tag';
+   tag.textContent=w.marked?({noun:'Noun',verb:'Verb',adjective:'Adj.'}[w.tag]):(level===2?'\u00a0':'?');
+   b.append(text,tag);b.addEventListener('click',()=>stamp(i,b));host.appendChild(b);
+ });
+ markProgress();
+}
+function newSentence(){
+ words=generate().map(w=>({...w,marked:false}));completed=false;revealed=false;
+ updateDirections();setFeedback('');$('confetti').replaceChildren();render();
+}
+function playTone(freq=500,other=690){if(!soundOn)return;try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();const oscillator=audioCtx.createOscillator(),gain=audioCtx.createGain();oscillator.type='sine';oscillator.frequency.setValueAtTime(freq,audioCtx.currentTime);oscillator.frequency.exponentialRampToValueAtTime(other,audioCtx.currentTime+.12);gain.gain.setValueAtTime(.07,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.2);oscillator.connect(gain);gain.connect(audioCtx.destination);oscillator.start();oscillator.stop(audioCtx.currentTime+.21)}catch(e){}}
+function celebrate(){const parent=$('confetti');parent.replaceChildren();for(let i=0;i<25;i++){let p=document.createElement('i');p.className='piece';p.style.left=Math.round(Math.random()*100)+'%';p.style.background=choose(['#f6b94d','#b79bfc','#5dcc9c','#62b9f3','#fa89bb']);p.style.borderRadius=choose(['50%','3px']);p.style.setProperty('--x',(Math.random()*160-80)+'px');p.style.setProperty('--r',(Math.random()*900-450)+'deg');p.style.animationDelay=(Math.random()*.25)+'s';parent.append(p)}}
+function stamp(i,node){
+ const word=words[i];if(!word||word.marked||completed)return;
+ if(word.tag===null){
+   setFeedback('Good detective clue! “'+word.text+'” stays blank in Level 2.','tryagain');
+   return;
+ }
+ if(selected!==word.tag){
+   node.classList.remove('wrong');void node.offsetWidth;node.classList.add('wrong');
+   setFeedback('Try another label for “'+word.text+'.”','tryagain');playTone(270,215);return;
+ }
+ word.marked=true;playTone(500,730);render();
+ if(words.filter(w=>w.tag!==null).every(w=>w.marked)){
+   completed=true;if(!revealed){
+     solved++;streak++;$('solved').textContent=solved;$('streak').textContent=streak;
+     setFeedback('🌟 Hooray! You labeled everything that needs a label!','success');
+     celebrate();playTone(700,1080);
+   }else setFeedback('You found all the labels! Try a new sentence.','success');
+ }else setFeedback('Great job! Keep going!');
+}
+function showAnswers(){
+ if(completed)return;
+ revealed=true;completed=true;streak=0;$('streak').textContent=streak;
+ words.forEach(w=>{if(w.tag!==null)w.marked=true});
+ render();setFeedback(level===2?'🔎 The uncolored words do not need labels.':'🔎 Here are the labels. Try the next sentence!');
+}
+function speech(){speakText(sentenceText())}
+function printable(){
+  let rows='';
+  for(let i=0;i<8;i++){
+    const sheetLength=length==='mix'?(i%2?'long':'short'):length;
+    const sample=generate(sheetLength);
+    rows += '<div class="print-row"><small>Sentence '+(i+1)+'</small>' + sample.map((w,index)=>'<span>'+w.text+(index===sample.length-1?'.':'')+'</span>').join('') + '</div>';
+  }
+  const printHTML='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Sentence Sprouts Print Practice</title><style>'+
+    'body{font-family:Arial,sans-serif;background:#f4f8ff;color:#111;margin:0;padding:24px;}'+
+    '.sheet{max-width:900px;margin:0 auto;background:#fff;border:3px solid #8bb4e8;border-radius:18px;padding:24px 28px;box-shadow:0 8px 26px rgba(0,0,0,.08);}'+
+    'h1{margin:0 0 8px;font-size:30px;color:#24508d;}'+
+    '.sub{margin:0 0 18px;font-size:14px;color:#4e6280;font-weight:bold;}'+
+    '.name-line{margin:10px 0 16px;font-size:16px;}'+
+    '.instruction{margin:0 0 18px;font-size:16px;}'+
+    '.print-row{font-size:25px;line-height:1.6;margin:0 0 18px;padding:10px 0 18px;border-bottom:1px solid #cfd8e6;}'+
+    '.print-row span{display:inline-block;margin:0 13px 0 0;min-width:60px;border-bottom:2px solid #444;padding:0 2px 12px;font-family:"Comic Sans MS","Comic Sans","Trebuchet MS",sans-serif;font-size:26px;font-weight:700;}'+
+    '.print-row small{display:block;color:#555;font-size:12px;margin-bottom:8px;font-weight:bold;letter-spacing:.4px;}'+
+    '.footer{margin-top:18px;font-size:13px;color:#334;}'+
+    '.toolbar{display:flex;gap:10px;justify-content:flex-end;margin:0 auto 14px;max-width:900px;}'+
+    'button{font:inherit;font-weight:bold;padding:10px 14px;border-radius:10px;border:2px solid #7fa9de;background:#fff;cursor:pointer;}'+
+    '@media print{body{background:#fff;padding:0}.toolbar{display:none}.sheet{box-shadow:none;border:0;border-radius:0;max-width:none;padding:0}}'+
+    '</style></head><body>'+
+    '<div class="toolbar"><button onclick="window.print()">Print</button><button onclick="window.close()">Close</button></div>'+
+    '<div class="sheet"><h1>Sentence Sprouts! 🌱</h1><p class="sub">Printable Practice Worksheet · Level '+level+'</p><p class="name-line">Name: ___________________________ &nbsp;&nbsp;&nbsp; Date: __________________</p><p class="instruction">Write <b>N</b> for nouns, <b>V</b> for action verbs, and <b>Adj</b> for adjectives on the lines under the words.'+(level===2?' <b>Leave all other words blank.</b>':'')+'</p>'+rows+'<p class="footer">Noun = person, place, or thing &nbsp;&nbsp;&bull;&nbsp;&nbsp; Verb = action word &nbsp;&nbsp;&bull;&nbsp;&nbsp; Adjective = describing word</p></div></body></html>';
+  const printWindow=window.open('', '_blank', 'width=980,height=760');
+  if(!printWindow){
+    setFeedback('Your browser blocked the print window. Please allow pop-ups for this file.','tryagain');
+    return;
+  }
+  printWindow.document.open();
+  printWindow.document.write(printHTML);
+  printWindow.document.close();
+  printWindow.focus();
+}
+document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>{selected=b.dataset.tag;document.querySelectorAll('.tool').forEach(v=>{const active=v===b;v.classList.toggle('selected',active);v.setAttribute('aria-pressed',String(active))})}));
+$('length-picker').addEventListener('change',()=>{length=$('length-picker').value;newSentence()});
+$('level-picker').addEventListener('change',()=>{level=Number($('level-picker').value);lastSentences=[];streak=0;$('streak').textContent=streak;newSentence()});
+$('voice-picker').addEventListener('change',()=>{
+  chosenVoiceKey=$('voice-picker').value;
+  try{localStorage.setItem(VOICE_STORAGE_KEY,chosenVoiceKey)}catch(e){}
+  voiceStatus();
+});
+$('voice-test').addEventListener('click',()=>speakText('The happy frog hops on a big log.'));
+$('voice-refresh').addEventListener('click',refreshVoices);
+if('speechSynthesis' in window){
+  window.speechSynthesis.addEventListener('voiceschanged',refreshVoices);
+  // Edge and Chrome may deliver the voice list after the page is ready.
+  setTimeout(refreshVoices,500);
+  setTimeout(refreshVoices,1700);
+}
+refreshVoices();
+$('next').addEventListener('click',()=>{if(!completed&&!revealed&&words.some(w=>w.marked)){streak=0;$('streak').textContent=streak}newSentence()});$('show').addEventListener('click',showAnswers);$('read').addEventListener('click',speech);$('print').addEventListener('click',printable);$('sound').addEventListener('click',()=>{soundOn=!soundOn;$('sound').textContent=soundOn?'♪ Sounds on':'♪ Sounds off';$('sound').setAttribute('aria-pressed',String(soundOn))});
+const voiceToggle=$('voice-toggle');
+const voicePanel=$('voice-panel');
+voiceToggle.addEventListener('click',()=>{
+  const opening=voicePanel.hidden;
+  voicePanel.hidden=!opening;
+  voiceToggle.setAttribute('aria-expanded',String(opening));
+  voiceToggle.setAttribute('aria-label',opening?'Close voice settings':'Open voice settings');
+  voiceToggle.title=opening?'Close voice settings':'Voice settings';
+});
+newSentence();
+</script>
+</body>
+</html>
