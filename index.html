@@ -293,29 +293,80 @@ h1 span{color:#286caa}
   .word .word-text{margin-top:0;}
 }
 
+
+/* Teacher-only skill chooser: deliberately compact to keep the white sentence area central. */
+.skills-picker{position:relative;flex:0 0 auto;z-index:15;font-family:inherit}
+.skills-picker summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:39px;padding:8px 12px;background:#fff;border:1px solid #89b2da;border-radius:10px;color:#23486c;font-size:13px;font-weight:900;white-space:nowrap}
+.skills-picker summary::-webkit-details-marker{display:none}
+.skills-picker summary:focus-visible,.skill-choice:focus-within{outline:3px solid #ffe06b;outline-offset:2px}
+.skills-chevron{color:#557da9;transition:transform .15s;font-size:13px}
+.skills-picker[open] .skills-chevron{transform:rotate(180deg)}
+.skills-menu{position:absolute;top:calc(100% + 5px);left:0;min-width:235px;width:max-content;max-width:min(88vw,310px);padding:13px 12px;background:#f8fcff;border:2px solid #92bae1;border-radius:14px;box-shadow:0 12px 28px rgba(21,59,107,.2);color:#264f7b}
+.skills-menu-heading{font-size:12px;font-weight:900;margin:0 0 8px}
+.skill-choice{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:900;padding:9px 10px;margin-top:5px;border-radius:10px;cursor:pointer;user-select:none}
+.skill-choice input{width:19px;height:19px;cursor:pointer;flex:0 0 auto;margin:0}
+.skill-noun{background:#ffdddd;color:#982a35}.skill-noun input{accent-color:#ce3646}
+.skill-verb{background:#def7e8;color:#187446}.skill-verb input{accent-color:#22935b}
+.skill-adjective{background:#fff1bb;color:#81600b}.skill-adjective input{accent-color:#ad7b00}
+.skills-feedback{font-size:11px;color:#4d7299;font-weight:700;padding:10px 3px 0;max-width:265px;line-height:1.35}
+.tools .tool[hidden]{display:none!important}
+@media(max-width:640px){.skills-picker summary{font-size:12px;min-height:38px;padding:7px 10px}.skills-menu{left:0;max-width:min(87vw,280px)}}
+
+/* Word-following read-aloud: vivid tracking without changing grammar colors. */
+.sentence .word.reading{
+  outline:4px solid #f3ac21;
+  outline-offset:2px;
+  box-shadow:0 0 0 7px rgba(255,211,73,.32),0 4px 8px rgba(41,65,98,.16);
+  transform:translateY(-2px);
+  position:relative;
+  z-index:2;
+}
+.sentence .word.reading .word-text{
+  background:#fff19c;
+  color:#243550;
+  border-radius:7px;
+  box-shadow:0 0 0 3px #fff19c;
+}
+@media(prefers-reduced-motion:reduce){.sentence .word.reading{transform:none}}
+/* Teacher option beside Sounds On; highlighting is on for first-time visitors. */
+.highlight-option{display:inline-flex;align-items:center;gap:7px;min-height:39px;padding:8px 11px;border:1px solid #9dbfe0;border-radius:10px;background:#e0f0ff;color:#285582;font-size:12px;font-weight:900;white-space:nowrap;cursor:pointer;user-select:none}
+.highlight-option input{width:18px;height:18px;margin:0;accent-color:#2675b4;cursor:pointer}
+.highlight-option:focus-within{outline:3px solid #ffe06b;outline-offset:2px}
+@media(max-width:640px){.highlight-option{padding:7px 9px;min-height:38px;font-size:12px}}
+
+/* Small note immediately after the parts-of-speech subtitle. */
+.subtitle .browser-note{display:inline-block;margin-left:10px;padding:4px 9px;border:1px solid #e7b900;border-radius:7px;background:#fff000;color:#372e00;font-size:11px;font-weight:900;letter-spacing:0;vertical-align:middle}
+@media(max-width:640px){.subtitle .browser-note{margin:5px 0 0 0;font-size:10.5px}}
 </style>
 </head>
 <body>
 <main class="app">
-<header><div class="logo"><div class="mascot" aria-hidden="true">🌱</div><div><h1>Sentence <span>Sprouts!</span></h1><p class="subtitle">Nouns · Verbs · Adjectives</p></div></div></header>
+<header><div class="logo"><div class="mascot" aria-hidden="true">🌱</div><div><h1>Sentence <span>Sprouts!</span></h1><p class="subtitle">Nouns · Verbs · Adjectives <span class="browser-note">This page is optimized for Edge browsers.</span></p></div></div></header>
 <section class="panel options" aria-label="Activity settings">
   <div class="settings-left">
     <div class="top-picker-row">
       <label class="settings-select" for="length-picker">Sentence length
         <select id="length-picker" aria-label="Sentence length">
           <option value="mix">🎲 Mixed lengths</option>
-          <option value="short">🌱 3 words</option>
-          <option value="long">🌳 5 words</option>
+          <option value="3">🌱 3 words</option>
+          <option value="4">🌿 4 words</option>
+          <option value="5">🌳 5 words</option>
+          <option value="6">🌲 6 words</option>
         </select>
       </label>
+      <details id="skills-picker" class="skills-picker">
+        <summary aria-label="Choose grammar skills to practice"><span id="skills-summary-label">🎯 Skills: All three</span><span class="skills-chevron" aria-hidden="true">▾</span></summary>
+        <div class="skills-menu" role="group" aria-label="Choose the parts of speech to identify">
+          <div class="skills-menu-heading">Choose one, two, or all three:</div>
+          <label class="skill-choice skill-noun"><input class="skill-check" type="checkbox" value="noun" checked> <span>Nouns</span></label>
+          <label class="skill-choice skill-verb"><input class="skill-check" type="checkbox" value="verb" checked> <span>Action verbs</span></label>
+          <label class="skill-choice skill-adjective"><input class="skill-check" type="checkbox" value="adjective" checked> <span>Adjectives</span></label>
+          <div id="skills-feedback" class="skills-feedback" aria-live="polite">Only chosen skills will be labeled.</div>
+        </div>
+      </details>
       <button id="print" class="action top-action" type="button">🖨️ Print practice</button>
       <button id="sound" class="action top-action" type="button" aria-pressed="true">♪ Sounds on</button>
-      <label class="settings-select level-select" for="level-picker">Level
-        <select id="level-picker" aria-label="Choose difficulty level">
-          <option value="1">Level 1 · Label all</option>
-          <option value="2">Level 2 · Some blank</option>
-        </select>
-      </label>
+      <label class="highlight-option" for="highlight-words"><input type="checkbox" id="highlight-words" checked> Highlight words</label>
     </div>
   </div>
   <div class="stats"><div class="stat"><b id="solved">0</b>Sentences</div><div class="stat"><b id="streak">0</b>In a row</div></div>
@@ -345,10 +396,10 @@ h1 span{color:#286caa}
   </div>
 <section id="voice-panel" class="voice-panel" aria-label="Read-aloud voice settings" hidden>
   <div class="voice-panel-content">
-  <p class="voice-hint">🎙️ Voice settings — Clara preferred</p>
+  <p class="voice-hint">🎙️ Voice settings — Brian in Edge, Clara in Chrome</p>
   <p class="voice-hint">Choose a voice or reading speed for the class.</p>
   <div class="voice-controls">
-    <select id="voice-picker" aria-label="Reading voice"><option value="auto">⭐ Microsoft Clara, if available</option></select>
+    <select id="voice-picker" aria-label="Reading voice"><option value="auto">⭐ Brian (Edge) / Clara (Chrome), if available</option></select>
     <select id="voice-speed" aria-label="Reading speed"><option value="0.9" selected>🐢 Gentle pace</option><option value="1">Normal pace</option><option value="0.75">Extra slow</option></select>
     <button id="voice-test" class="action" type="button">▶ Try this voice</button>
     <button id="voice-refresh" class="action" type="button">↻ Find voices</button>
@@ -424,11 +475,45 @@ const level2Places=[
  ['pirates','sail','across','oceans'],
  ['dragons','fly','over','mountains']
 ];
-let selected='noun',length='mix',level=1,words=[],solved=0,streak=0,completed=false,revealed=false,soundOn=true,lastSentences=[],audioCtx=null;
+let selected='noun',length='mix',words=[],solved=0,streak=0,completed=false,revealed=false,soundOn=true,lastSentences=[],audioCtx=null;
+// Teacher can focus on any combination of nouns, action verbs, and adjectives.
+const SKILLS_STORAGE_KEY='sentence-sprouts-selected-skills-v1';
+const skillOrder=['noun','verb','adjective'];
+let activeSkills=new Set(skillOrder);
+try {
+  const savedSkills=JSON.parse(localStorage.getItem(SKILLS_STORAGE_KEY)||'null');
+  if(Array.isArray(savedSkills)&&savedSkills.length&&savedSkills.every(t=>skillOrder.includes(t))){
+    activeSkills=new Set(savedSkills);
+  }
+}catch(e){}
+function isTarget(w){return w.tag!==null && activeSkills.has(w.tag)}
+const skillLabels={noun:'nouns',verb:'action verbs',adjective:'adjectives'};
+function selectedSkillPhrase(){
+  const names=skillOrder.filter(t=>activeSkills.has(t)).map(t=>skillLabels[t]);
+  if(names.length===1)return names[0];
+  if(names.length===2)return names.join(' and ');
+  return names.slice(0,2).join(', ')+', and '+names[2];
+}
+function refreshSkillControls(){
+  const enabled=skillOrder.filter(t=>activeSkills.has(t));
+  const title=enabled.length===3?'All three':enabled.map(t=>({noun:'Nouns',verb:'Verbs',adjective:'Adjectives'}[t])).join(' + ');
+  $('skills-summary-label').textContent='🎯 Skills: '+title;
+  document.querySelectorAll('.skill-check').forEach(c=>c.checked=activeSkills.has(c.value));
+  if(!activeSkills.has(selected)) selected=enabled[0];
+  document.querySelectorAll('.tool').forEach(b=>{
+    const active=b.dataset.tag===selected;
+    b.hidden=!activeSkills.has(b.dataset.tag);
+    b.classList.toggle('selected',active);
+    b.setAttribute('aria-pressed',String(active));
+  });
+}
+
 const $=id=>document.getElementById(id);
 const choose=arr=>arr[Math.floor(Math.random()*arr.length)];
-// The browser, not the HTML file, supplies voices. Clara is preferred, never fabricated.
-const VOICE_STORAGE_KEY='sentence-sprouts-chosen-voice-v1';
+// The browser supplies available voices: Brian first in Edge, Clara first in Chrome.
+// Use a new preference key so old saved voice choices do not override these new defaults.
+const IS_EDGE=/\bEdg(?:A|iOS)?\//i.test(navigator.userAgent);
+const VOICE_STORAGE_KEY='sentence-sprouts-chosen-voice-v2';
 let availableVoices=[];
 let chosenVoiceKey='auto';
 try{chosenVoiceKey=localStorage.getItem(VOICE_STORAGE_KEY)||'auto'}catch(e){}
@@ -436,6 +521,7 @@ function voiceKey(v){return v.name+'|'+v.lang+'|'+v.voiceURI}
 function englishVoice(v){return /^en([_-]|$)/i.test(v.lang||'')}
 function voiceRank(v){
   const name=v.name||'';
+  if(IS_EDGE && /microsoft/i.test(name) && /\bbrian\b/i.test(name))return 1100;
   if(/\bclara\b/i.test(name))return 1000;
   if(/microsoft/i.test(name)&&/natural|online/i.test(name))return 800;
   if(/microsoft/i.test(name)&&/jenny|aria|sonia|ava|emma/i.test(name))return 700;
@@ -458,8 +544,9 @@ function voiceStatus(){
   const chosen=activeVoice();
   if(!chosen){text.textContent='No English voice is available in this browser.';return;}
   const isClara=/\bclara\b/i.test(chosen.name);
+  const isBrian=/\bbrian\b/i.test(chosen.name);
   const unavailable=chosenVoiceKey!=='auto'&&!availableVoices.some(v=>voiceKey(v)===chosenVoiceKey);
-  text.textContent=(isClara?'💚 Clara is ready! ':'🔊 Using ')+
+  text.textContent=(isBrian?'💚 Brian is ready! ':isClara?'💚 Clara is ready! ':'🔊 Using ')+
     chosen.name+
     (unavailable?' (Your saved choice is not offered here; using a fallback.)':'')+
     (chosen.localService?' • On-device voice':' • May need internet access');
@@ -476,90 +563,165 @@ function refreshVoices(){
   const current=select.value;
   select.replaceChildren();
   const auto=document.createElement('option');auto.value='auto';
-  auto.textContent='⭐ Clara / best available (automatic)';select.appendChild(auto);
+  auto.textContent='⭐ '+(IS_EDGE?'Brian':'Clara')+' / best available (automatic)';select.appendChild(auto);
   for(const voice of availableVoices){
     const option=document.createElement('option');
     option.value=voiceKey(voice);
-    option.textContent=voice.name+' ('+voice.lang+')'+(/\bclara\b/i.test(voice.name)?' ⭐':'');
+    option.textContent=voice.name+' ('+voice.lang+')'+((IS_EDGE?/\bbrian\b/i:/\bclara\b/i).test(voice.name)?' ⭐':'');
     select.appendChild(option);
   }
   const desired=chosenVoiceKey!=='auto'?chosenVoiceKey:current;
   select.value=Array.from(select.options).some(o=>o.value===desired)?desired:'auto';
   voiceStatus();
 }
-function speakText(text){
+// Teacher preference is saved separately in each browser; first-time default is ON.
+const HIGHLIGHT_STORAGE_KEY='sentence-sprouts-word-highlighting-v1';
+let highlightWordsOn=true;
+try{
+  const savedHighlight=localStorage.getItem(HIGHLIGHT_STORAGE_KEY);
+  if(savedHighlight!==null)highlightWordsOn=savedHighlight==='true';
+}catch(e){}
+// Follow-along highlighting: prefer actual speech word-boundary events.
+// Some Edge voices do not expose those events; use a gentle approximate
+// visual cadence in those browsers so the feature still works.
+let readingIndex=-1,readingRun=0,readingTimer=null;
+function highlightReading(index){
+  readingIndex=index;
+  document.querySelectorAll('#sentence .word').forEach((b,i)=>
+    b.classList.toggle('reading',highlightWordsOn && i===index));
+}
+function clearReadingTimer(){if(readingTimer!==null){clearTimeout(readingTimer);readingTimer=null}}
+function stopReading(){
+  readingRun++;
+  clearReadingTimer();
+  highlightReading(-1);
+  if('speechSynthesis' in window)try{speechSynthesis.cancel()}catch(e){}
+}
+function charOffsets(){
+  let pos=0;
+  return words.map((w,i)=>{const start=pos;pos+=w.text.length+(i===words.length-1?1:1);return start});
+}
+function speakText(text,trackSentence=false){
   if(!('speechSynthesis' in window)){
     setFeedback('Reading aloud is not supported by this browser.');return;
   }
   try{
+    stopReading();
     refreshVoices();
+    const run=readingRun;
     const utterance=new SpeechSynthesisUtterance(text);
     const chosen=activeVoice();
     if(chosen){utterance.voice=chosen;utterance.lang=chosen.lang}
     else utterance.lang='en-US';
-    utterance.rate=Number($('voice-speed').value)||0.9;
-    utterance.pitch=1; // Keep natural voices natural; raising pitch can sound robotic.
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-  }catch(e){setFeedback('This voice could not start. Please try a different voice.','tryagain')}
+    const rate=Number($('voice-speed').value)||0.9;
+    utterance.rate=rate;
+    utterance.pitch=1;
+    const offsets=trackSentence?charOffsets():[];
+    let boundarySeen=false;
+    let fallbackIndex=0;
+    function fallbackStep(){
+      if(run!==readingRun||boundarySeen||!trackSentence)return;
+      fallbackIndex++;
+      if(fallbackIndex>=words.length)return;
+      highlightReading(fallbackIndex);
+      const syllableTime=Math.max(290,(words[fallbackIndex].text.length*80+185)/rate);
+      readingTimer=setTimeout(fallbackStep,syllableTime);
+    }
+    utterance.onstart=()=>{
+      if(run!==readingRun||!trackSentence)return;
+      highlightReading(0);
+      const firstTime=Math.max(620,(words[0].text.length*85+300)/rate);
+      readingTimer=setTimeout(fallbackStep,firstTime);
+    };
+    utterance.onboundary=(e)=>{
+      if(run!==readingRun||!trackSentence)return;
+      if(e.name && e.name!=='word')return;
+      boundarySeen=true;
+      clearReadingTimer();
+      let index=0;
+      for(let i=0;i<offsets.length;i++)if(e.charIndex>=offsets[i])index=i;
+      highlightReading(index);
+    };
+    utterance.onend=()=>{if(run===readingRun){clearReadingTimer();highlightReading(-1)}};
+    utterance.onerror=()=>{if(run===readingRun){clearReadingTimer();highlightReading(-1)}};
+    speechSynthesis.speak(utterance);
+  }catch(e){clearReadingTimer();highlightReading(-1);setFeedback('This voice could not start. Please try another voice.','tryagain')}
 }
 
-function generate(targetLength=length){
-  let made=[];let tries=0;
-  do{
-    const useLong=targetLength==='long'||(targetLength==='mix'&&Math.random()>.43);
-    const scene=choose(scenes);
-    const [adj,noun]=choose(scene.heads).split(' ');
-    if(level===2){
-      // Three words: The frogs hop. Four: The tiny frogs hop.
-      // Five: The happy frogs catch flies. OR The frogs hop over logs.
-      const four=targetLength==='mix'&&Math.random()<.16;
-      if(useLong && !four && Math.random()<.48){
-        const [subject,verb,prep,place]=choose(level2Places);
-        made=[{text:'The',tag:null},{text:subject,tag:'noun'},
-              {text:verb,tag:'verb'},{text:prep,tag:null},{text:place,tag:'noun'}];
-      }else if(useLong && !four){
-        const [verb,object]=choose(scene.long);
-        const objectNoun=object.split(' ')[1];
-        made=[{text:'The',tag:null},{text:adj.toLowerCase(),tag:'adjective'},
-              {text:noun,tag:'noun'},{text:verb,tag:'verb'},{text:objectNoun,tag:'noun'}];
-      }else if(four){
-        made=[{text:'The',tag:null},{text:adj.toLowerCase(),tag:'adjective'},
-              {text:noun,tag:'noun'},{text:choose(scene.short),tag:'verb'}];
-      }else{
-        made=[{text:'The',tag:null},{text:noun,tag:'noun'},
-              {text:choose(scene.short),tag:'verb'}];
-      }
-    }else if(targetLength==='mix' && Math.random()<.12){
-      const [name,verb,objAdj,objNoun]=choose(nameSentences);
-      made=[{text:name,tag:'noun'},{text:verb,tag:'verb'},
-            {text:objAdj,tag:'adjective'},{text:objNoun,tag:'noun'}];
-    }else{
-      made=[{text:adj,tag:'adjective'},{text:noun,tag:'noun'}];
-      if(useLong){
-        const [verb,object]=choose(scene.long),[objectAdj,objectNoun]=object.split(' ');
-        made.push({text:verb,tag:'verb'},
-                  {text:objectAdj,tag:'adjective'},{text:objectNoun,tag:'noun'});
-      }else made.push({text:choose(scene.short),tag:'verb'});
+// Each sentence length has its own grammatically sensible, hand-curated pattern.
+// Only nouns, action verbs, and adjectives require labels; articles and
+// prepositions are visible but left blank. No helping or linking verbs.
+function makeWord(text,tag){return {text,tag}}
+function sceneHead(scene){const [adj,noun]=choose(scene.heads).split(' ');return {adj:adj.toLowerCase(),noun}}
+function makeSceneSentence(count){
+  const scene=choose(scenes);
+  const {adj,noun}=sceneHead(scene);
+  const shortVerb=choose(scene.short);
+  const [longVerb,object]=choose(scene.long);
+  const [objectAdj,objectNoun]=object.split(' ');
+  const placeMatches=level2Places.filter(([subject])=>subject===noun);
+  const place=placeMatches.length?choose(placeMatches):null;
+  const w=makeWord;
+  if(count===3){
+    return [w(adj,'adjective'),w(noun,'noun'),w(shortVerb,'verb')];
+  }
+  if(count===4){
+    if(Math.random()<.25){
+      const [name,verb,descriptor,thing]=choose(nameSentences);
+      return [w(name,'noun'),w(verb,'verb'),w(descriptor,'adjective'),w(thing,'noun')];
     }
+    return [w('The',null),w(adj,'adjective'),w(noun,'noun'),w(shortVerb,'verb')];
+  }
+  if(count===5){
+    const kind=place?Math.floor(Math.random()*4):Math.floor(Math.random()*3);
+    if(kind===0){
+      return [w(adj,'adjective'),w(noun,'noun'),w(longVerb,'verb'),w(objectAdj,'adjective'),w(objectNoun,'noun')];
+    }
+    if(kind===1){
+      return [w('The',null),w(noun,'noun'),w(longVerb,'verb'),w(objectAdj,'adjective'),w(objectNoun,'noun')];
+    }
+    if(kind===2){
+      return [w('The',null),w(adj,'adjective'),w(noun,'noun'),w(longVerb,'verb'),w(objectNoun,'noun')];
+    }
+    const [,verb,prep,placeNoun]=place;
+    return [w('The',null),w(noun,'noun'),w(verb,'verb'),w(prep,null),w(placeNoun,'noun')];
+  }
+  // Six-word sentences bring in simple natural articles and prepositions.
+  const kind=place?Math.floor(Math.random()*3):0;
+  if(kind===0){
+    return [w('The',null),w(adj,'adjective'),w(noun,'noun'),w(longVerb,'verb'),w(objectAdj,'adjective'),w(objectNoun,'noun')];
+  }
+  const [,verb,prep,placeNoun]=place;
+  if(kind===1){
+    return [w('The',null),w(adj,'adjective'),w(noun,'noun'),w(verb,'verb'),w(prep,null),w(placeNoun,'noun')];
+  }
+  return [w(adj,'adjective'),w(noun,'noun'),w(verb,'verb'),w(prep,null),w('the',null),w(placeNoun,'noun')];
+}
+function generate(targetLength=length){
+  let made=[],tries=0;
+  do{
+    const size=targetLength==='mix'?choose([3,4,5,6]):Number(targetLength);
+    made=makeSceneSentence(size);
     tries++;
-  }while(lastSentences.includes(made.map(w=>w.text).join(' '))&&tries<40);
-  const sentence=made.map(w=>w.text).join(' ');
-  lastSentences.push(sentence);
-  if(lastSentences.length>15)lastSentences.shift();
+  }while((lastSentences.includes(made.map(w=>w.text).join(' ').toLowerCase()) ||
+           !made.some(isTarget)) && tries<150);
+  // Fall back to a universal sentence with all three target categories.
+  if(!made.some(isTarget))made=makeSceneSentence(3);
+  const signature=made.map(w=>w.text).join(' ').toLowerCase();
+  lastSentences.push(signature);
+  if(lastSentences.length>18)lastSentences.shift();
   made[0].text=made[0].text.charAt(0).toUpperCase()+made[0].text.slice(1);
   return made;
 }
+
 function updateDirections(){
-  $('directions').textContent=level===1
-   ?'Choose a color. Tap the matching words.'
-   :'Choose a color. Label only nouns, action verbs, and adjectives. Leave other words blank.';
+  $('directions').textContent='Find the '+selectedSkillPhrase()+'. Leave the other words blank.';
 }
 function sentenceText(){return words.map((w,i)=>w.text+(i===words.length-1?'.':'')).join(' ')}
 function markProgress(){
- const targets=words.filter(w=>w.tag!==null);
+ const targets=words.filter(isTarget);
  const marked=targets.filter(w=>w.marked).length;
- const ratio=Math.round(marked/targets.length*100);
+ const ratio=targets.length?Math.round(marked/targets.length*100):0;
  $('progress-label').textContent=marked+' of '+targets.length+' labeled';
  $('progress-fill').style.width=ratio+'%';
  document.querySelector('.progress-bar').setAttribute('aria-valuenow',ratio);
@@ -569,18 +731,19 @@ function render(){
  const host=$('sentence');host.replaceChildren();
  words.forEach((w,i)=>{
    const b=document.createElement('button');b.type='button';
-   b.className='word'+(w.marked?' done-'+w.tag:'');
-   b.disabled=!!w.marked || (completed && w.tag===null);
+   b.className='word'+(w.marked?' done-'+w.tag:'')+(readingIndex===i?' reading':'');
+   b.disabled=!!w.marked || completed;
    b.setAttribute('aria-label',w.text+(w.marked?' labeled '+w.tag:''));
    const text=document.createElement('span');text.className='word-text';
    text.textContent=w.text+(i===words.length-1?'.':'');
    const tag=document.createElement('span');tag.className='word-tag';
-   tag.textContent=w.marked?({noun:'Noun',verb:'Verb',adjective:'Adj.'}[w.tag]):(level===2?'\u00a0':'?');
+   tag.textContent=w.marked?({noun:'Noun',verb:'Verb',adjective:'Adj.'}[w.tag]):'\u00a0';
    b.append(text,tag);b.addEventListener('click',()=>stamp(i,b));host.appendChild(b);
  });
  markProgress();
 }
 function newSentence(){
+ stopReading();
  words=generate().map(w=>({...w,marked:false}));completed=false;revealed=false;
  updateDirections();setFeedback('');$('confetti').replaceChildren();render();
 }
@@ -588,8 +751,8 @@ function playTone(freq=500,other=690){if(!soundOn)return;try{audioCtx=audioCtx||
 function celebrate(){const parent=$('confetti');parent.replaceChildren();for(let i=0;i<25;i++){let p=document.createElement('i');p.className='piece';p.style.left=Math.round(Math.random()*100)+'%';p.style.background=choose(['#f6b94d','#b79bfc','#5dcc9c','#62b9f3','#fa89bb']);p.style.borderRadius=choose(['50%','3px']);p.style.setProperty('--x',(Math.random()*160-80)+'px');p.style.setProperty('--r',(Math.random()*900-450)+'deg');p.style.animationDelay=(Math.random()*.25)+'s';parent.append(p)}}
 function stamp(i,node){
  const word=words[i];if(!word||word.marked||completed)return;
- if(word.tag===null){
-   setFeedback('Good detective clue! “'+word.text+'” stays blank in Level 2.','tryagain');
+ if(!isTarget(word)){
+   setFeedback('Leave “'+word.text+'” blank this time. Find the '+selectedSkillPhrase()+'.','tryagain');
    return;
  }
  if(selected!==word.tag){
@@ -597,7 +760,7 @@ function stamp(i,node){
    setFeedback('Try another label for “'+word.text+'.”','tryagain');playTone(270,215);return;
  }
  word.marked=true;playTone(500,730);render();
- if(words.filter(w=>w.tag!==null).every(w=>w.marked)){
+ if(words.filter(isTarget).every(w=>w.marked)){
    completed=true;if(!revealed){
      solved++;streak++;$('solved').textContent=solved;$('streak').textContent=streak;
      setFeedback('🌟 Hooray! You labeled everything that needs a label!','success');
@@ -607,18 +770,21 @@ function stamp(i,node){
 }
 function showAnswers(){
  if(completed)return;
+ stopReading();
  revealed=true;completed=true;streak=0;$('streak').textContent=streak;
- words.forEach(w=>{if(w.tag!==null)w.marked=true});
- render();setFeedback(level===2?'🔎 The uncolored words do not need labels.':'🔎 Here are the labels. Try the next sentence!');
+ words.forEach(w=>{if(isTarget(w))w.marked=true});
+ render();setFeedback('🔎 Only the chosen skills get labels. All other words stay blank.');
 }
-function speech(){speakText(sentenceText())}
+function speech(){speakText(sentenceText(),true)}
 function printable(){
   let rows='';
   for(let i=0;i<8;i++){
-    const sheetLength=length==='mix'?(i%2?'long':'short'):length;
+    const sheetLength=length==='mix'?String(3+(i%4)):length;
     const sample=generate(sheetLength);
     rows += '<div class="print-row"><small>Sentence '+(i+1)+'</small>' + sample.map((w,index)=>'<span>'+w.text+(index===sample.length-1?'.':'')+'</span>').join('') + '</div>';
   }
+  const selectedInstructions=skillOrder.filter(t=>activeSkills.has(t)).map(t=>({noun:'<b>N</b> for nouns',verb:'<b>V</b> for action verbs',adjective:'<b>Adj</b> for adjectives'}[t])).join(', ');
+  const leaveBlank=' <b>Leave all other words blank.</b>';
   const printHTML='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Sentence Sprouts Print Practice</title><style>'+
     'body{font-family:Arial,sans-serif;background:#f4f8ff;color:#111;margin:0;padding:24px;}'+
     '.sheet{max-width:900px;margin:0 auto;background:#fff;border:3px solid #8bb4e8;border-radius:18px;padding:24px 28px;box-shadow:0 8px 26px rgba(0,0,0,.08);}'+
@@ -635,7 +801,7 @@ function printable(){
     '@media print{body{background:#fff;padding:0}.toolbar{display:none}.sheet{box-shadow:none;border:0;border-radius:0;max-width:none;padding:0}}'+
     '</style></head><body>'+
     '<div class="toolbar"><button onclick="window.print()">Print</button><button onclick="window.close()">Close</button></div>'+
-    '<div class="sheet"><h1>Sentence Sprouts! 🌱</h1><p class="sub">Printable Practice Worksheet · Level '+level+'</p><p class="name-line">Name: ___________________________ &nbsp;&nbsp;&nbsp; Date: __________________</p><p class="instruction">Write <b>N</b> for nouns, <b>V</b> for action verbs, and <b>Adj</b> for adjectives on the lines under the words.'+(level===2?' <b>Leave all other words blank.</b>':'')+'</p>'+rows+'<p class="footer">Noun = person, place, or thing &nbsp;&nbsp;&bull;&nbsp;&nbsp; Verb = action word &nbsp;&nbsp;&bull;&nbsp;&nbsp; Adjective = describing word</p></div></body></html>';
+    '<div class="sheet"><h1>Sentence Sprouts! 🌱</h1><p class="sub">Printable Practice Worksheet</p><p class="name-line">Name: ___________________________ &nbsp;&nbsp;&nbsp; Date: __________________</p><p class="instruction">Write '+selectedInstructions+' under matching words.'+leaveBlank+'</p>'+rows+'<p class="footer">Noun = person, place, or thing &nbsp;&nbsp;&bull;&nbsp;&nbsp; Verb = action word &nbsp;&nbsp;&bull;&nbsp;&nbsp; Adjective = describing word</p></div></body></html>';
   const printWindow=window.open('', '_blank', 'width=980,height=760');
   if(!printWindow){
     setFeedback('Your browser blocked the print window. Please allow pop-ups for this file.','tryagain');
@@ -646,9 +812,31 @@ function printable(){
   printWindow.document.close();
   printWindow.focus();
 }
-document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>{selected=b.dataset.tag;document.querySelectorAll('.tool').forEach(v=>{const active=v===b;v.classList.toggle('selected',active);v.setAttribute('aria-pressed',String(active))})}));
+document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>{
+  if(!activeSkills.has(b.dataset.tag))return;
+  selected=b.dataset.tag;refreshSkillControls();
+}));
+document.querySelectorAll('.skill-check').forEach(c=>c.addEventListener('change',()=>{
+  const next=new Set(activeSkills);
+  if(c.checked)next.add(c.value);else next.delete(c.value);
+  if(next.size===0){
+    c.checked=true;
+    $('skills-feedback').textContent='Please keep at least one skill selected.';
+    return;
+  }
+  activeSkills=next;
+  try{localStorage.setItem(SKILLS_STORAGE_KEY,JSON.stringify(skillOrder.filter(t=>activeSkills.has(t))))}catch(e){}
+  $('skills-feedback').textContent='Children only label the chosen parts of speech.';
+  refreshSkillControls();
+  lastSentences=[];streak=0;$('streak').textContent=streak;
+  newSentence();
+}));
+// The dropdown stays small and closes when clicking elsewhere.
+document.addEventListener('click',e=>{
+  const details=$('skills-picker');
+  if(details.open&&!details.contains(e.target))details.open=false;
+});
 $('length-picker').addEventListener('change',()=>{length=$('length-picker').value;newSentence()});
-$('level-picker').addEventListener('change',()=>{level=Number($('level-picker').value);lastSentences=[];streak=0;$('streak').textContent=streak;newSentence()});
 $('voice-picker').addEventListener('change',()=>{
   chosenVoiceKey=$('voice-picker').value;
   try{localStorage.setItem(VOICE_STORAGE_KEY,chosenVoiceKey)}catch(e){}
@@ -663,6 +851,12 @@ if('speechSynthesis' in window){
   setTimeout(refreshVoices,1700);
 }
 refreshVoices();
+$('highlight-words').checked=highlightWordsOn;
+$('highlight-words').addEventListener('change',()=>{
+  highlightWordsOn=$('highlight-words').checked;
+  try{localStorage.setItem(HIGHLIGHT_STORAGE_KEY,String(highlightWordsOn))}catch(e){}
+  highlightReading(readingIndex); // Hide immediately when switched off; restore if switched on.
+});
 $('next').addEventListener('click',()=>{if(!completed&&!revealed&&words.some(w=>w.marked)){streak=0;$('streak').textContent=streak}newSentence()});$('show').addEventListener('click',showAnswers);$('read').addEventListener('click',speech);$('print').addEventListener('click',printable);$('sound').addEventListener('click',()=>{soundOn=!soundOn;$('sound').textContent=soundOn?'♪ Sounds on':'♪ Sounds off';$('sound').setAttribute('aria-pressed',String(soundOn))});
 const voiceToggle=$('voice-toggle');
 const voicePanel=$('voice-panel');
@@ -673,6 +867,7 @@ voiceToggle.addEventListener('click',()=>{
   voiceToggle.setAttribute('aria-label',opening?'Close voice settings':'Open voice settings');
   voiceToggle.title=opening?'Close voice settings':'Voice settings';
 });
+refreshSkillControls();
 newSentence();
 </script>
 </body>
